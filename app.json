@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "Bajol Matrimony",
+    "slug": "matrimony-mobile",
+    "version": "1.0.0",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": [
+          "phonepe",
+          "tez",
+          "paytm",
+          "paytmmp",
+          "bhim",
+          "amazonpay",
+          "credpay",
+          "phonepe",
+          "tez",
+          "paytm",
+          "paytmmp",
+          "bhim",
+          "amazonpay",
+          "credpay"
+        ]
+      },
+      "bundleIdentifier": "com.anonymous.matrimony-mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F5EFE6"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.anonymous.matrimonymobile"
+    },
+    "extra": {
+      "apiBaseUrl": "${EXPO_PUBLIC_API_BASE_URL}"
+    }
+  }
+}
