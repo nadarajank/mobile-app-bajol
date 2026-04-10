@@ -4,6 +4,7 @@ import authReducer from "../features/auth/authSlice";
 import formReducer from "../features/form/formSlice";
 import otpReducer from "../features/otp/otpSlice";
 import { authApi } from "../api/authApi";
+import { commentApi } from "../api/commentApi";
 import { deleteAccountApi } from "../api/deleteAccountApi";
 import { editFormApi } from "../api/editFormApi";
 import { formApi } from "../api/formApi";
@@ -19,6 +20,7 @@ export const store = configureStore({
     form: formReducer,
     otp: otpReducer,
     [authApi.reducerPath]: authApi.reducer,
+    [commentApi.reducerPath]: commentApi.reducer,
     [deleteAccountApi.reducerPath]: deleteAccountApi.reducer,
     [editFormApi.reducerPath]: editFormApi.reducer,
     [formApi.reducerPath]: formApi.reducer,
@@ -31,6 +33,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
       authApi.middleware,
+      commentApi.middleware,
       deleteAccountApi.middleware,
       editFormApi.middleware,
       formApi.middleware,

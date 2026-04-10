@@ -1,21 +1,27 @@
-import React, { useEffect, useRef } from "react";
-import { Animated, Image, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Animated, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
+import { PickerField } from "../components/PickerField";
 import { Screen } from "../components/Screen";
+import { useLanguage } from "../localization/LanguageContext";
+import { languageOptions } from "../localization/translations";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { colors } from "../theme/colors";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
 export function HomeScreen({ navigation }: Props) {
+  const { copy, language, setLanguage } = useLanguage();
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const heroAnim = useRef(new Animated.Value(0)).current;
   const introCardAnim = useRef(new Animated.Value(0)).current;
   const couplesCardAnim = useRef(new Animated.Value(0)).current;
   const featureCardsAnim = useRef(new Animated.Value(0)).current;
   const learnMoreAnim = useRef(new Animated.Value(0)).current;
+  const selectedLanguage = languageOptions.find((option) => option.code === language);
 
   useEffect(() => {
     Animated.stagger(120, [
@@ -65,24 +71,28 @@ export function HomeScreen({ navigation }: Props) {
         <Animated.View style={[styles.hero, getRevealStyle(heroAnim, 24)]}>
           <Image source={require("../../assets/baa.jpeg")} style={styles.logo} resizeMode="contain" />
           {/* <Text style={styles.eyebrow}>Bajol Matrimony</Text> */}
-          <Text style={styles.title}>💍 Dream of Marriage</Text>
-          <Text style={styles.subtitle}>
-            There are three ways to a happy marriage: The first way is to be kind. The second way is to be kind. The third way is to be kind.
-          </Text>
+          <Text style={styles.title}>💍 {copy.home.title}</Text>
+          <Text style={styles.subtitle}>{copy.home.subtitle}</Text>
         </Animated.View>
 
         <Animated.View style={getRevealStyle(introCardAnim)}>
           <Card>
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Are you already registered in BAJOL ?</Text>
+              <Text style={styles.sectionTitle}>{copy.home.registeredPrompt}</Text>
               <View style={styles.actions}>
-                <Button label="🚀 Did" onPress={() => navigation.navigate("Login")} />
+                <Button label={`🚀 ${copy.home.loginButton}`} onPress={() => navigation.navigate("Login")} />
                 <Button
-                  label="✅ Do Register Now"
+                  label={`✅ ${copy.home.registerButton}`}
                   onPress={() => navigation.navigate("Register")}
                   variant="secondary"
                 />
               </View>
+              <PickerField
+                label={copy.home.languageTitle}
+                onPress={() => setShowLanguageModal(true)}
+                placeholder={copy.home.languageHint}
+                value={selectedLanguage ? `${selectedLanguage.nativeLabel} (${selectedLanguage.label})` : ""}
+              />
             </View>
           </Card>
         </Animated.View>
@@ -90,7 +100,7 @@ export function HomeScreen({ navigation }: Props) {
         <Animated.View style={getRevealStyle(couplesCardAnim)}>
           <Card>
             <View style={styles.section}>
-              <Text style={styles.bannerText}>❤️ Alliances for every age at Bajol Matrimony ❤️</Text>
+              <Text style={styles.bannerText}>❤️ {copy.home.alliancesTitle} ❤️</Text>
               <Image
                 source={require("../../assets/couples.jpg")}
                 style={styles.couplesImage}
@@ -98,39 +108,37 @@ export function HomeScreen({ navigation }: Props) {
               // width={100}
               // height={300}
               />
-              <Text style={styles.caption}>
-                ❤️ Connecting hearts, creating futures ❤️
-              </Text>
+              <Text style={styles.caption}>❤️ {copy.home.alliancesCaption} ❤️</Text>
             </View>
           </Card>
         </Animated.View>
 
         <Animated.View style={getRevealStyle(featureCardsAnim)}>
           <View style={styles.section}>
-            <Text style={styles.bannerText}>💖 Find your Special Someone 💖</Text>
+            <Text style={styles.bannerText}>💖 {copy.home.specialSomeoneTitle} 💖</Text>
           </View>
 
           <Card>
             <View style={[styles.cardss, styles.section, styles.featureCard]}>
-              <Text style={styles.featureTitle}>📝 Sign Up</Text>
+              <Text style={styles.featureTitle}>📝 {copy.home.signUpTitle}</Text>
               <View style={styles.actions}>
-                <Text style={styles.featureText}>Register for free and create your matrimony profile.</Text>
+                <Text style={styles.featureText}>{copy.home.signUpText}</Text>
               </View>
             </View>
           </Card>
           <Card>
             <View style={[styles.section, styles.featureCard]}>
-              <Text style={styles.featureTitle}>💞 Connect</Text>
+              <Text style={styles.featureTitle}>💞 {copy.home.connectTitle}</Text>
               <View style={styles.actions}>
-                <Text style={styles.featureText}>Select your perfect match and connect with profiles you like.</Text>
+                <Text style={styles.featureText}>{copy.home.connectText}</Text>
               </View>
             </View>
           </Card>
           <Card>
             <View style={[styles.section, styles.featureCard]}>
-              <Text style={styles.featureTitle}>💬 Interact</Text>
+              <Text style={styles.featureTitle}>💬 {copy.home.interactTitle}</Text>
               <View style={styles.actions}>
-                <Text style={styles.featureText}>Become a member, start conversations, and build your future.</Text>
+                <Text style={styles.featureText}>{copy.home.interactText}</Text>
               </View>
             </View>
           </Card>
@@ -139,21 +147,17 @@ export function HomeScreen({ navigation }: Props) {
         <Animated.View style={getRevealStyle(couplesCardAnim)}>
 
           <View style={styles.section}>
-            <Text style={styles.bannerText}>20,000+ have found their life partner at BajolMatrimony!</Text>
-            <Text style={styles.caption}>
-              Bajol.com - Trusted by over 20,000+ Members
-            </Text>
-            <Text style={styles.bannerTexts}>Bajol.com, one of world's best known brands and the world's largest matrimonial service was founded with a simple objective - to help people find happiness. The company pioneered online matrimonials in 1996 and continues to lead the exciting matrimony category after more than a decade. By redefining the way Indian brides and grooms meet for marriage, bajolmatrimony.com has created a world-renowned service that has touched over 20,000+ people.</Text>
-            <Text style={styles.caption}>
-              India | USA | Canada | UK | Singapore | Australia | UAE | NRI Matrimonials
-            </Text>
+            <Text style={styles.bannerText}>{copy.home.membersTitle}</Text>
+            <Text style={styles.caption}>{copy.home.membersCaption}</Text>
+            <Text style={styles.bannerTexts}>{copy.home.membersBody}</Text>
+            <Text style={styles.caption}>{copy.home.globalRegions}</Text>
 
             <Card>
               <View style={styles.section}>
-                <Text style={styles.bannerText}>Trusted by 20,000+ Members</Text>
-                <Text style={styles.caption}>💑 Best Matches</Text>
-                <Text style={styles.caption}>✅ Verified Profiles</Text>
-                <Text style={styles.caption}>🔒 100% Privacy</Text>
+                <Text style={styles.bannerText}>{copy.home.trustedTitle}</Text>
+                <Text style={styles.caption}>💑 {copy.home.bestMatches}</Text>
+                <Text style={styles.caption}>✅ {copy.home.verifiedProfiles}</Text>
+                <Text style={styles.caption}>🔒 {copy.home.privacy}</Text>
               </View>
             </Card>
 
@@ -164,13 +168,18 @@ export function HomeScreen({ navigation }: Props) {
         <Animated.View style={getRevealStyle(learnMoreAnim)}>
           <Card>
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Learn more</Text>
+              <Text style={styles.sectionTitle}>{copy.home.learnMore}</Text>
               <View style={styles.actions}>
-                <Button label="About Bajol" onPress={() => navigation.navigate("About")} variant="secondary" />
-                <Button label="Rules" onPress={() => navigation.navigate("Rules")} variant="secondary" />
+                <Button label={copy.home.aboutButton} onPress={() => navigation.navigate("About")} variant="secondary" />
+                <Button label={copy.home.rulesButton} onPress={() => navigation.navigate("Rules")} variant="secondary" />
                 <Button
-                  label="Conclusion"
+                  label={copy.home.conclusionButton}
                   onPress={() => navigation.navigate("Conclusion")}
+                  variant="secondary"
+                />
+                <Button
+                  label={copy.home.privacyPolicyButton}
+                  onPress={() => navigation.navigate("PrivacyPolicy")}
                   variant="secondary"
                 />
               </View>
@@ -179,9 +188,32 @@ export function HomeScreen({ navigation }: Props) {
         </Animated.View>
       </View>
 
-      <Text style={styles.caption}>
-        © 2026 BAJOL ONLINE MATRIMONY PRIVATE LIMITED. All Rights Reserved.
-      </Text>
+      <Modal animationType="slide" transparent visible={showLanguageModal}>
+        <View style={styles.modalBackdrop}>
+          <Card>
+            <Text style={styles.modalTitle}>{copy.home.languageTitle}</Text>
+            <ScrollView contentContainerStyle={styles.optionListContent} style={styles.optionList}>
+              {languageOptions.map((option) => (
+                <Pressable
+                  key={option.code}
+                  onPress={() => {
+                    void setLanguage(option.code);
+                    setShowLanguageModal(false);
+                  }}
+                  style={styles.optionItem}
+                >
+                  <Text style={styles.optionText}>
+                    {option.nativeLabel} ({option.label})
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+            <Button label="Close" onPress={() => setShowLanguageModal(false)} variant="secondary" />
+          </Card>
+        </View>
+      </Modal>
+
+      <Text style={styles.caption}>{copy.common.copyright}</Text>
     </Screen>
   );
 }
@@ -265,6 +297,39 @@ const styles = StyleSheet.create({
   },
   actions: {
     gap: 12,
+  },
+  modalBackdrop: {
+    backgroundColor: "rgba(30, 27, 22, 0.45)",
+    flex: 1,
+    justifyContent: "flex-end",
+    padding: 20,
+  },
+  modalTitle: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: "800",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  optionList: {
+    marginBottom: 16,
+    maxHeight: 260,
+  },
+  optionListContent: {
+    gap: 10,
+  },
+  optionItem: {
+    backgroundColor: colors.white,
+    borderColor: colors.border,
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  optionText: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "600",
   },
   featureCard: {
     backgroundColor: "#1565C0",

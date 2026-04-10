@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { hydrateSession } from "../features/auth/authSlice";
 import { loadSession } from "../storage/sessionStorage";
 import { colors } from "../theme/colors";
+import { useLanguage } from "../localization/LanguageContext";
 import { AboutScreen } from "../screens/AboutScreen";
 import { CompleteProfileScreen } from "../screens/CompleteProfileScreen";
 import { ConclusionScreen } from "../screens/ConclusionScreen";
@@ -15,6 +16,7 @@ import { HomeScreen } from "../screens/HomeScreen";
 import { LoginScreen } from "../screens/LoginScreen";
 import { NotFoundScreen } from "../screens/NotFoundScreen";
 import { OnboardingScreen } from "../screens/OnboardingScreen";
+import { PrivacyPolicyScreen } from "../screens/PrivacyPolicyScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { RegisterScreen } from "../screens/RegisterScreen";
 import { RulesScreen } from "../screens/RulesScreen";
@@ -28,6 +30,7 @@ export type RootStackParamList = {
   About: undefined;
   Rules: undefined;
   Conclusion: undefined;
+  PrivacyPolicy: undefined;
   Onboarding: undefined;
   NotFound: undefined;
   CompleteProfile: { userId: number; initialData?: Record<string, unknown> };
@@ -40,6 +43,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function Bootstrap() {
   const dispatch = useAppDispatch();
   const hydrated = useAppSelector((state) => state.auth.hydrated);
+  const { copy } = useLanguage();
 
   useEffect(() => {
     loadSession()
@@ -60,7 +64,7 @@ function Bootstrap() {
     return (
       <View style={styles.loading}>
         <ActivityIndicator color={colors.primary} size="large" />
-        <Text style={styles.loadingText}>Loading mobile app...</Text>
+        <Text style={styles.loadingText}>{copy.common.loading}</Text>
       </View>
     );
   }
@@ -70,6 +74,7 @@ function Bootstrap() {
 
 function NavigatorContent() {
   const token = useAppSelector((state) => state.auth.token);
+  const { copy } = useLanguage();
 
   if (token) {
     return (
@@ -81,30 +86,35 @@ function NavigatorContent() {
           contentStyle: { backgroundColor: colors.background },
         }}
       >
-        <Stack.Screen name="Home" component={HomeScreen} options={{ title: "Bajol Matrimony" }} />
-        <Stack.Screen name="Login" component={LoginScreen} options={{ title: "Sign In" }} />
-        <Stack.Screen name="Register" component={RegisterScreen} options={{ title: "Create Account" }} />
-        <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: "Profile" }} />
-        <Stack.Screen name="About" component={AboutScreen} options={{ title: "About" }} />
-        <Stack.Screen name="Rules" component={RulesScreen} options={{ title: "Rules" }} />
+        <Stack.Screen name="Home" component={HomeScreen} options={{ title: copy.nav.home }} />
+        <Stack.Screen name="Login" component={LoginScreen} options={{ title: copy.nav.login }} />
+        <Stack.Screen name="Register" component={RegisterScreen} options={{ title: copy.nav.register }} />
+        <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: copy.nav.profile }} />
+        <Stack.Screen name="About" component={AboutScreen} options={{ title: copy.nav.about }} />
+        <Stack.Screen name="Rules" component={RulesScreen} options={{ title: copy.nav.rules }} />
         <Stack.Screen
           name="Conclusion"
           component={ConclusionScreen}
-          options={{ title: "Conclusion" }}
+          options={{ title: copy.nav.conclusion }}
+        />
+        <Stack.Screen
+          name="PrivacyPolicy"
+          component={PrivacyPolicyScreen}
+          options={{ title: copy.nav.privacyPolicy }}
         />
         <Stack.Screen
           name="Onboarding"
           component={OnboardingScreen}
-          options={{ title: "Profile Flow" }}
+          options={{ title: copy.nav.onboarding }}
         />
-        <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: "Not Found" }} />
+        <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: copy.nav.notFound }} />
         <Stack.Screen
           name="CompleteProfile"
           component={CompleteProfileScreen}
-          options={{ title: "Complete Profile" }}
+          options={{ title: copy.nav.completeProfile }}
         />
-        <Stack.Screen name="Discovery" component={DiscoveryScreen} options={{ title: "Discover" }} />
-        <Stack.Screen name="UploadPhoto" component={UploadPhotoScreen} options={{ title: "Upload Photo" }} />
+        <Stack.Screen name="Discovery" component={DiscoveryScreen} options={{ title: copy.nav.discovery }} />
+        <Stack.Screen name="UploadPhoto" component={UploadPhotoScreen} options={{ title: copy.nav.uploadPhoto }} />
       </Stack.Navigator>
     );
   }
@@ -118,29 +128,34 @@ function NavigatorContent() {
         contentStyle: { backgroundColor: colors.background },
       }}
     >
-      <Stack.Screen name="Home" component={HomeScreen} options={{ title: "Bajol Matrimony" }} />
-      <Stack.Screen name="Login" component={LoginScreen} options={{ title: "Sign In" }} />
-      <Stack.Screen name="Register" component={RegisterScreen} options={{ title: "Create Account" }} />
-      <Stack.Screen name="About" component={AboutScreen} options={{ title: "About" }} />
-      <Stack.Screen name="Rules" component={RulesScreen} options={{ title: "Rules" }} />
+      <Stack.Screen name="Home" component={HomeScreen} options={{ title: copy.nav.home }} />
+      <Stack.Screen name="Login" component={LoginScreen} options={{ title: copy.nav.login }} />
+      <Stack.Screen name="Register" component={RegisterScreen} options={{ title: copy.nav.register }} />
+      <Stack.Screen name="About" component={AboutScreen} options={{ title: copy.nav.about }} />
+      <Stack.Screen name="Rules" component={RulesScreen} options={{ title: copy.nav.rules }} />
       <Stack.Screen
         name="Conclusion"
         component={ConclusionScreen}
-        options={{ title: "Conclusion" }}
+        options={{ title: copy.nav.conclusion }}
+      />
+      <Stack.Screen
+        name="PrivacyPolicy"
+        component={PrivacyPolicyScreen}
+        options={{ title: copy.nav.privacyPolicy }}
       />
       <Stack.Screen
         name="Onboarding"
         component={OnboardingScreen}
-        options={{ title: "Profile Flow" }}
+        options={{ title: copy.nav.onboarding }}
       />
-      <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: "Not Found" }} />
+      <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: copy.nav.notFound }} />
       <Stack.Screen
         name="CompleteProfile"
         component={CompleteProfileScreen}
-        options={{ title: "Complete Profile" }}
+        options={{ title: copy.nav.completeProfile }}
       />
-      <Stack.Screen name="Discovery" component={DiscoveryScreen} options={{ title: "Discover" }} />
-      <Stack.Screen name="UploadPhoto" component={UploadPhotoScreen} options={{ title: "Upload Photo" }} />
+      <Stack.Screen name="Discovery" component={DiscoveryScreen} options={{ title: copy.nav.discovery }} />
+      <Stack.Screen name="UploadPhoto" component={UploadPhotoScreen} options={{ title: copy.nav.uploadPhoto }} />
     </Stack.Navigator>
   );
 }

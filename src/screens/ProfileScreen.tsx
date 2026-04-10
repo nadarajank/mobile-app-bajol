@@ -23,6 +23,7 @@ import { Screen } from "../components/Screen";
 import { hasRequiredProfileData } from "../constants/profileOptions";
 import { logout } from "../features/auth/authSlice";
 import { resetForm } from "../features/form/formSlice";
+import { useLanguage } from "../localization/LanguageContext";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { clearSession } from "../storage/sessionStorage";
 import { colors } from "../theme/colors";
@@ -48,7 +49,8 @@ const plans = [
   {
     planId: 2,
     name: "GOLD",
-    description: "Unlock profile creation and premium match access.",
+    // description: "Unlock profile creation and premium match access.",
+    description: "Only onetime payment there is no another payment to get profile",
     price: 1,
     features: [
       "Unlimited profile views",
@@ -336,13 +338,16 @@ const getCurrencyCode = (country?: string): string => {
 };
 
 export function ProfileScreen({ navigation }: Props) {
+  const { copy } = useLanguage();
   const dispatch = useAppDispatch();
   const isFocused = useIsFocused();
   const user = useAppSelector((state) => state.auth.user);
   const fallbackUser = useAppSelector((state) => state.form.authUser);
   const userId = Number((user?.id as number | string | undefined) ?? (fallbackUser?.id as number | string | undefined));
-  const { data, error, isLoading, refetch } = useGetUserProfileQuery(userId, {
+  const { data, error, isLoading, isFetching, refetch } = useGetUserProfileQuery(userId, {
     skip: !userId,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
   });
   const [deleteUserAccount, { isLoading: isDeleting }] = useDeleteUserAccountMutation();
   const [createCashfreeOrder, { isLoading: isCreatingOrder }] = useCreateCashfreeOrderMutation();
@@ -356,7 +361,13 @@ export function ProfileScreen({ navigation }: Props) {
 
     try {
       setIsRefreshing(true);
-      await refetch();
+      const result = await refetch();
+
+      if ("error" in result) {
+        throw result.error;
+      }
+    } catch {
+      Alert.alert("Refresh failed", "Unable to refresh profile data.");
     } finally {
       setIsRefreshing(false);
     }
@@ -531,10 +542,10 @@ export function ProfileScreen({ navigation }: Props) {
     return (
       <Screen onRefresh={handleRefresh} refreshing={isRefreshing}>
         <Card>
-          <Text style={styles.title}>No user session found</Text>
-          <Text style={styles.muted}>Sign in again to fetch your profile.</Text>
+          <Text style={styles.title}>{copy.profile.noSessionTitle}</Text>
+          <Text style={styles.muted}>{copy.profile.noSessionText}</Text>
           <View style={styles.gap} />
-          <Button label="Logout" onPress={handleLogout} />
+          <Button label={copy.profile.logout} onPress={handleLogout} />
         </Card>
       </Screen>
     );
@@ -545,7 +556,7 @@ export function ProfileScreen({ navigation }: Props) {
       <Screen onRefresh={handleRefresh} refreshing={isRefreshing}>
         <View style={styles.center}>
           <ActivityIndicator color={colors.primary} size="large" />
-          <Text style={styles.muted}>Loading your profile...</Text>
+          <Text style={styles.muted}>{copy.profile.loadingProfile}</Text>
         </View>
       </Screen>
     );
@@ -555,14 +566,12 @@ export function ProfileScreen({ navigation }: Props) {
     return (
       <Screen onRefresh={handleRefresh} refreshing={isRefreshing}>
         <Card>
-          <Text style={styles.title}>Profile fetch failed</Text>
-          <Text style={styles.muted}>
-            The backend returned an error. This screen uses the same `/user/get/:id` API as the web app.
-          </Text>
+          <Text style={styles.title}>{copy.profile.fetchFailedTitle}</Text>
+          <Text style={styles.muted}>{copy.profile.fetchFailedText}</Text>
           <View style={styles.gap} />
-          <Button label="Retry" onPress={() => refetch()} />
+          <Button label={copy.profile.retry} loading={isRefreshing || isFetching} onPress={() => void handleRefresh()} />
           <View style={styles.gap} />
-          <Button label="Logout" onPress={handleLogout} variant="secondary" />
+          <Button label={copy.profile.logout} onPress={handleLogout} variant="secondary" />
         </Card>
       </Screen>
     );
@@ -572,7 +581,7 @@ export function ProfileScreen({ navigation }: Props) {
     <Card>
       {/* <Text style={styles.title}>Choose a plan</Text> */}
       <Text style={styles.title}>
-       🚀 After payment you can go to register page Fill your Bio-data 🚀
+        🚀 {copy.profile.paymentIntro} 🚀
       </Text>
       {/* <View style={styles.statusCard}>
         <Text style={styles.statusTitle}>Payment status</Text>
@@ -580,7 +589,7 @@ export function ProfileScreen({ navigation }: Props) {
         <Text style={styles.statusText}>Country: {String(data?.country ?? "India")}</Text>
       </View> */}
       <View style={styles.gap} />
-      <Text style={styles.planTitle}>* After Payment You Touch On Reload Button *</Text>
+      <Text style={styles.planTitle}>{copy.profile.reloadHint}</Text>
       {/* <Text style={styles.planHint}>
         {hasCashfreeNativeModule
           ? "After payment completes, refresh if the profile state does not update immediately."
@@ -601,7 +610,7 @@ export function ProfileScreen({ navigation }: Props) {
           </View>
           <View style={styles.gap} />
           <Button
-            label={hasCashfreeNativeModule ? "Pay with Cashfree" : "Cashfree Requires Dev Build"}
+            label={copy.profile.payNow}
             loading={isCreatingOrder || isStartingPayment}
             onPress={() => handleCashfreePayment(plan.planId, plan.price)}
           />
@@ -609,39 +618,32 @@ export function ProfileScreen({ navigation }: Props) {
       ))}
       <View style={styles.gap} />
       <Button
-        label="Refresh"
-        onPress={async () => {
-          try {
-            await refetch();
-          } catch {
-            Alert.alert("Refresh failed", "Unable to refresh profile data.");
-          }
-        }}
+        label={copy.profile.reload}
+        loading={isRefreshing || isFetching}
+        onPress={() => void handleRefresh()}
       />
       <View style={styles.gap} />
-      <Button label="About Bajol" onPress={() => navigation.navigate("About")} variant="secondary" />
+      <Button label={copy.profile.aboutBajol} onPress={() => navigation.navigate("About")} variant="secondary" />
       <View style={styles.gap} />
-      <Button label="Rules" onPress={() => navigation.navigate("Rules")} variant="secondary" />
+      <Button label={copy.profile.rules} onPress={() => navigation.navigate("Rules")} variant="secondary" />
       <View style={styles.gap} />
-      <Button label="Logout" onPress={handleLogout} variant="secondary" />
+      <Button label={copy.profile.back} onPress={handleLogout} variant="secondary" />
     </Card>
   );
 
   const renderCompleteProfileState = () => (
     <Card>
-      <Text style={styles.title}>Complete your profile</Text>
-      <Text style={styles.muted}>
-        Payment is active, but required profile details are still missing.
-      </Text>
+      <Text style={styles.title}>{copy.profile.completeProfileTitle}</Text>
+      <Text style={styles.muted}>{copy.profile.completeProfileText}</Text>
       <View style={styles.statusCard}>
-        <Text style={styles.statusTitle}>Current status</Text>
-        <Text style={styles.statusText}>Payment active: Yes</Text>
-        <Text style={styles.statusText}>Profile complete: No</Text>
-        <Text style={styles.statusText}>Photo uploaded: {hasImages ? "Yes" : "No"}</Text>
+        <Text style={styles.statusTitle}>{copy.profile.currentStatus}</Text>
+        <Text style={styles.statusText}>{copy.profile.paymentActive}: {copy.profile.yes}</Text>
+        <Text style={styles.statusText}>{copy.profile.profileComplete}: {copy.profile.no}</Text>
+        <Text style={styles.statusText}>{copy.profile.photoUploaded}: {hasImages ? copy.profile.yes : copy.profile.no}</Text>
       </View>
       <View style={styles.gap} />
       <Button
-        label="Complete Profile"
+        label={copy.profile.completeProfileButton}
         onPress={() =>
           navigation.navigate("CompleteProfile", {
             userId,
@@ -650,72 +652,73 @@ export function ProfileScreen({ navigation }: Props) {
         }
       />
       <View style={styles.gap} />
-      <Button label="Refresh" onPress={() => refetch()} variant="secondary" />
+      <Button
+        label={copy.profile.refresh}
+        loading={isRefreshing || isFetching}
+        onPress={() => void handleRefresh()}
+        variant="secondary"
+      />
       <View style={styles.gap} />
-      <Button label="Logout" onPress={handleLogout} variant="secondary" />
+      <Button label={copy.profile.logout} onPress={handleLogout} variant="secondary" />
     </Card>
   );
 
   const renderUploadPhotoState = () => (
     <Card>
-      <Text style={styles.title}>Upload profile photo</Text>
-      <Text style={styles.muted}>
-        Your payment is active and profile details are complete. Add a photo to continue.
-      </Text>
+      <Text style={styles.title}>{copy.profile.uploadPhotoTitle}</Text>
+      <Text style={styles.muted}>{copy.profile.uploadPhotoText}</Text>
       <View style={styles.statusCard}>
-        <Text style={styles.statusTitle}>Current status</Text>
-        <Text style={styles.statusText}>Payment active: Yes</Text>
-        <Text style={styles.statusText}>Profile complete: Yes</Text>
-        <Text style={styles.statusText}>Photo uploaded: No</Text>
+        <Text style={styles.statusTitle}>{copy.profile.currentStatus}</Text>
+        <Text style={styles.statusText}>{copy.profile.paymentActive}: {copy.profile.yes}</Text>
+        <Text style={styles.statusText}>{copy.profile.profileComplete}: {copy.profile.yes}</Text>
+        <Text style={styles.statusText}>{copy.profile.photoUploaded}: {copy.profile.no}</Text>
       </View>
       <View style={styles.gap} />
-      <Button label="Upload Photo" onPress={() => navigation.navigate("UploadPhoto")} />
+      <Button label={copy.profile.uploadPhotoButton} onPress={() => navigation.navigate("UploadPhoto")} />
       <View style={styles.gap} />
-      <Button label="Refresh" onPress={() => refetch()} variant="secondary" />
+      <Button
+        label={copy.profile.refresh}
+        loading={isRefreshing || isFetching}
+        onPress={() => void handleRefresh()}
+        variant="secondary"
+      />
       <View style={styles.gap} />
-      <Button label="Logout" onPress={handleLogout} variant="secondary" />
+      <Button label={copy.profile.logout} onPress={handleLogout} variant="secondary" />
     </Card>
   );
 
   const renderDiscoveryState = () => (
     <Card>
-      <Text style={styles.title}>Profile ready</Text>
-      <Text style={styles.muted}>
-        This matches the web flow after payment, profile completion, and photo upload.
-      </Text>
+      <Text style={styles.title}>{copy.profile.profileReadyTitle}</Text>
+      <Text style={styles.muted}>{copy.profile.profileReadyText}</Text>
       <View style={styles.statusCard}>
-        <Text style={styles.statusTitle}>Current status</Text>
-        <Text style={styles.statusText}>Payment active: Yes</Text>
-        <Text style={styles.statusText}>Profile complete: Yes</Text>
-        <Text style={styles.statusText}>Photo uploaded: Yes</Text>
+        <Text style={styles.statusTitle}>{copy.profile.currentStatus}</Text>
+        <Text style={styles.statusText}>{copy.profile.paymentActive}: {copy.profile.yes}</Text>
+        <Text style={styles.statusText}>{copy.profile.profileComplete}: {copy.profile.yes}</Text>
+        <Text style={styles.statusText}>{copy.profile.photoUploaded}: {copy.profile.yes}</Text>
       </View>
       <View style={styles.gap} />
-      <Button label="Discover Matches" onPress={() => navigation.navigate("Discovery")} />
+      <Button label={copy.profile.discoverMatches} onPress={() => navigation.navigate("Discovery")} />
       <View style={styles.gap} />
       <Button
-        label="Refresh"
-        onPress={async () => {
-          try {
-            await refetch();
-          } catch {
-            Alert.alert("Refresh failed", "Unable to refresh profile data.");
-          }
-        }}
+        label={copy.profile.refresh}
+        loading={isRefreshing || isFetching}
+        onPress={() => void handleRefresh()}
         variant="secondary"
       />
       <View style={styles.gap} />
-      <Button label="About Bajol" onPress={() => navigation.navigate("About")} variant="secondary" />
+      <Button label={copy.profile.aboutBajol} onPress={() => navigation.navigate("About")} variant="secondary" />
       <View style={styles.gap} />
-      <Button label="Rules" onPress={() => navigation.navigate("Rules")} variant="secondary" />
+      <Button label={copy.profile.rules} onPress={() => navigation.navigate("Rules")} variant="secondary" />
       <View style={styles.gap} />
       <Button
-        label="Profile Flow"
+        label={copy.profile.profileFlow}
         onPress={() => navigation.navigate("Onboarding")}
         variant="secondary"
       />
       <View style={styles.gap} />
       <Button
-        label="Conclusion"
+        label={copy.profile.conclusion}
         onPress={() => navigation.navigate("Conclusion")}
         variant="secondary"
       />
@@ -727,16 +730,16 @@ export function ProfileScreen({ navigation }: Props) {
         </View>
       ))}
       <View style={styles.gap} />
-      <Button label="Logout" onPress={handleLogout} variant="secondary" />
+      <Button label={copy.profile.logout} onPress={handleLogout} variant="secondary" />
       <View style={styles.gap} />
       <Button
-        label={isDeleting ? "Deleting..." : "Delete Account"}
+        label={isDeleting ? copy.profile.deleting : copy.profile.deleteAccount}
         onPress={handleDeleteAccount}
         variant="secondary"
       />
     </Card>
   );
-// The main render logic follows the same flow as the web `profile.tsx` component, with additional loading and error states.
+  // The main render logic follows the same flow as the web `profile.tsx` component, with additional loading and error states.
   return (
     <Screen onRefresh={handleRefresh} refreshing={isRefreshing}>
       {!hasPayments
@@ -746,6 +749,17 @@ export function ProfileScreen({ navigation }: Props) {
           : !hasImages
             ? renderUploadPhotoState()
             : renderDiscoveryState()}
+
+
+      {/* if (!hasPayments) {
+  content = renderPlanState();
+} else if (shouldShowProfileForm) {
+  content = renderCompleteProfileState();
+} else if (!hasImages) {
+  content = renderUploadPhotoState();
+} else {
+  content = renderDiscoveryState();
+} */}
     </Screen>
   );
 }

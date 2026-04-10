@@ -5,12 +5,15 @@ import { StatusBar } from "expo-status-bar";
 
 import { store } from "./src/store/store";
 import { AppNavigator } from "./src/navigation/AppNavigator";
+import { LanguageProvider } from "./src/localization/LanguageContext";
 
 export default function App() {
   return (
     <Provider store={store}>
-      <StatusBar style="dark" />
-      <AppNavigator />
+      <LanguageProvider>
+        <StatusBar style="dark" />
+        <AppNavigator />
+      </LanguageProvider>
     </Provider>
   );
 }

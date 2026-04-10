@@ -27,7 +27,9 @@ type ProfileFormValues = {
   name: string;
   age: string;
   job: string;
+  customJob: string;
   monthlySalary: string;
+  notes: string;
   country: string;
   state: string;
   district: string;
@@ -42,7 +44,53 @@ type ProfileFormValues = {
   // weight: string;
 };
 
-type PickerName = "country" | "state" | "district" | "gender" | "count" | "person" | null;
+type PickerName = "country" | "state" | "district" | "gender" | "count" | "person" | "job" | null;
+
+const JOB_OPTIONS = [
+  "Doctor",
+  "Nurse",
+  "Army",
+  "CRPF",
+  "Police",
+  "Excise",
+  "Forest",
+  "water authority",
+  "Electricity Board",
+  "Education sector",
+  "IT",
+  "Veterinary Doctor",
+  "Customs",
+  "Advocate",
+  "Tourism field",
+  "Working gulf",
+  "Government job",
+  "Church Priest",
+  "Church Pastor",
+  "Temple Priest",
+  "Marketing Field",
+  "Cinema field",
+  "Journalist",
+  "Driver",
+  "Printing press field",
+  "Small Busines field",
+  "Big Business field",
+  "Plumber",
+  "Electrician",
+  "Tourism",
+  "Vlogger",
+  "Painter",
+  "Mason",
+  "Welder",
+  "Sales job",
+  "Engineer",
+  "Computer field",
+  "Workshop field",
+  "Makeup artist",
+  "Beautician",
+  "Hair maker",
+  "Therapist",
+  "Another",
+] as const;
 
 const normalizeStateName = (value: unknown) =>
   STATE_OPTIONS.find(
@@ -55,15 +103,20 @@ const pickerOptions: Record<Exclude<PickerName, "district" | null>, readonly str
   gender: GENDER_OPTIONS,
   count: MARRIAGE_COUNT_OPTIONS,
   person: MARRIAGE_PERSON_OPTIONS,
+  job: JOB_OPTIONS,
 };
 
 export function CompleteProfileScreen({ navigation, route }: Props) {
   const [editForm, { isLoading }] = useEditFormMutation();
   const [activePicker, setActivePicker] = useState<PickerName>(null);
+  const [showCustomJobModal, setShowCustomJobModal] = useState(false);
+  const [customJobDraft, setCustomJobDraft] = useState("");
   const userId = route.params?.userId;
   const initialData = route.params?.initialData || {};
   const authUser = useAppSelector((state) => state.auth.user);
   const authUserState = authUser?.["state"];
+  const initialJob = String(initialData?.job || "");
+  const normalizedInitialJob = JOB_OPTIONS.includes(initialJob as (typeof JOB_OPTIONS)[number]) ? initialJob : initialJob ? "Another" : "";
   const defaultState = useMemo(
     () => normalizeStateName(initialData?.state || authUserState),
     [authUserState, initialData?.state],
@@ -73,8 +126,10 @@ export function CompleteProfileScreen({ navigation, route }: Props) {
     defaultValues: {
       name: String(initialData?.name || ""),
       age: String(initialData?.age || ""),
-      job: String(initialData?.job || ""),
+      job: normalizedInitialJob,
+      customJob: normalizedInitialJob === "Another" ? initialJob : "",
       monthlySalary: String(initialData?.monthlySalary || ""),
+      notes: String(initialData?.notes || ""),
       country: String(initialData?.country || "India"),
       state: String(defaultState || initialData?.state || authUserState || ""),
       district: String(initialData?.district || ""),
@@ -116,11 +171,20 @@ export function CompleteProfileScreen({ navigation, route }: Props) {
       return;
     }
 
+    const { customJob, mobile, ...restValues } = values;
+    const jobValue = values.job === "Another" ? values.customJob.trim() : values.job.trim();
+
+    if (!jobValue) {
+      Alert.alert("Missing job", "Job is required to save profile.");
+      return;
+    }
+
     try {
       await editForm({
         id: userId,
-        ...values,
-        phone_number: values.mobile,
+        ...restValues,
+        job: jobValue,
+        phone_number: mobile,
       }).unwrap();
       Alert.alert("Profile saved", "Profile details saved successfully.", [
         { text: "OK", onPress: () => navigation.replace("UploadPhoto") },
@@ -144,7 +208,11 @@ export function CompleteProfileScreen({ navigation, route }: Props) {
           setActivePicker(name);
         }}
         placeholder={placeholder}
-        value={(selectedValues[name] as string) || ""}
+        value={
+          name === "job" && selectedValues.job === "Another"
+            ? selectedValues.customJob || "Another"
+            : (selectedValues[name] as string) || ""
+        }
       />
       <Controller
         control={control}
@@ -167,11 +235,13 @@ export function CompleteProfileScreen({ navigation, route }: Props) {
         <Controller control={control} name="age" rules={{ required: "Age is required" }} render={({ field }) => (
           <TextField label="Age" keyboardType="number-pad" value={field.value} onChangeText={field.onChange} error={errors.age?.message} />
         )} />
-        <Controller control={control} name="job" rules={{ required: "Job is required" }} render={({ field }) => (
-          <TextField label="Job" value={field.value} onChangeText={field.onChange} error={errors.job?.message} />
-        )} />
+        {renderPicker("job", "Job", "Select job")}
+        <Controller control={control} name="customJob" render={() => <View />} />
         <Controller control={control} name="monthlySalary" rules={{ required: "Monthly salary is required" }} render={({ field }) => (
           <TextField label="Monthly Salary" keyboardType="number-pad" value={field.value} onChangeText={field.onChange} error={errors.monthlySalary?.message} />
+        )} />
+        <Controller control={control} name="notes" render={({ field }) => (
+          <TextField label="Notes" value={field.value} onChangeText={field.onChange} error={errors.notes?.message} placeholder="Enter additional notes" />
         )} />
 
         {renderPicker("country", "Country", "Select country")}
@@ -220,9 +290,20 @@ export function CompleteProfileScreen({ navigation, route }: Props) {
                   key={option}
                   onPress={() => {
                     if (activePicker) {
+                      if (activePicker === "job" && option === "Another") {
+                        setValue("job", "Another", { shouldValidate: true });
+                        setCustomJobDraft(String(selectedValues.customJob || ""));
+                        setActivePicker(null);
+                        setShowCustomJobModal(true);
+                        return;
+                      }
+
                       setValue(activePicker, option, { shouldValidate: true });
                       if (activePicker === "state") {
                         setValue("district", "", { shouldValidate: true });
+                      }
+                      if (activePicker === "job") {
+                        setValue("customJob", "", { shouldValidate: true });
                       }
                     }
                     setActivePicker(null);
@@ -237,6 +318,47 @@ export function CompleteProfileScreen({ navigation, route }: Props) {
               <Text style={styles.emptyState}>No districts available for the selected state.</Text>
             ) : null}
             <Button label="Close" onPress={() => setActivePicker(null)} variant="secondary" />
+          </Card>
+        </View>
+      </Modal>
+
+      <Modal transparent visible={showCustomJobModal} animationType="fade">
+        <View style={styles.modalBackdrop}>
+          <Card>
+            <Text style={styles.modalTitle}>Type Job</Text>
+            <TextField
+              label="Job"
+              value={customJobDraft}
+              onChangeText={setCustomJobDraft}
+              placeholder="Enter your job"
+            />
+            <View style={styles.modalActions}>
+              <Button
+                label="OK"
+                onPress={() => {
+                  const trimmedJob = customJobDraft.trim();
+
+                  if (!trimmedJob) {
+                    Alert.alert("Missing job", "Type the job before clicking OK.");
+                    return;
+                  }
+
+                  setValue("job", "Another", { shouldValidate: true });
+                  setValue("customJob", trimmedJob, { shouldValidate: true });
+                  setShowCustomJobModal(false);
+                }}
+              />
+              <Button
+                label="Cancel"
+                onPress={() => {
+                  if (!selectedValues.customJob) {
+                    setValue("job", "", { shouldValidate: true });
+                  }
+                  setShowCustomJobModal(false);
+                }}
+                variant="secondary"
+              />
+            </View>
           </Card>
         </View>
       </Modal>
@@ -278,6 +400,9 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
     borderBottomWidth: 1,
     paddingVertical: 14,
+  },
+  modalActions: {
+    gap: 12,
   },
   optionText: {
     color: colors.text,

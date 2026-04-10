@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "Bajol Matrimony",
+    "name": "Bajol",
     "slug": "matrimony-mobile",
     "version": "1.0.0",
+    "icon": "./assets/baa.jpeg",
     "platforms": [
       "ios",
       "android"
@@ -36,13 +37,17 @@
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/baa.jpeg",
         "backgroundColor": "#F5EFE6"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.anonymous.matrimonymobile"
     },
     "extra": {
-      "apiBaseUrl": "${EXPO_PUBLIC_API_BASE_URL}"
+      "apiBaseUrl": "${EXPO_PUBLIC_API_BASE_URL}",
+      "eas": {
+        "projectId": "df26d7fb-abac-4b07-a339-9c4e5edc1dbe"
+      }
     }
   }
 }

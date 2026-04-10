@@ -13,6 +13,7 @@ import { TextField } from "../components/TextField";
 import { INDIAN_STATES } from "../constants/stateOptions";
 import { setToken, setUser } from "../features/auth/authSlice";
 import { setAuthUser } from "../features/form/formSlice";
+import { useLanguage } from "../localization/LanguageContext";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { saveSession } from "../storage/sessionStorage";
 import { colors } from "../theme/colors";
@@ -29,6 +30,7 @@ type RegisterValues = {
 };
 
 export function RegisterScreen({ navigation }: Props) {
+  const { copy } = useLanguage();
   const dispatch = useAppDispatch();
   const [submitForm, { isLoading }] = useSubmitFormMutation();
   const [showStateModal, setShowStateModal] = useState(false);
@@ -78,7 +80,7 @@ export function RegisterScreen({ navigation }: Props) {
   return (
     <Screen>
       <Card>
-        <Text style={styles.title}>Create your account</Text>
+        <Text style={styles.title}>{copy.auth.createAccountTitle}</Text>
 
         <Controller
           control={control}
@@ -88,7 +90,7 @@ export function RegisterScreen({ navigation }: Props) {
             <TextField
               error={errors.mobile?.message}
               keyboardType="phone-pad"
-              label="Phone Number"
+              label={copy.auth.phoneNumber}
               onChangeText={onChange}
               placeholder="91XXXXXXXXXX"
               value={value}
@@ -98,9 +100,9 @@ export function RegisterScreen({ navigation }: Props) {
 
         <PickerField
           error={errors.state?.message}
-          label="State"
+          label={copy.auth.state}
           onPress={() => setShowStateModal(true)}
-          placeholder="Select your state"
+          placeholder={copy.auth.selectState}
           value={watch("state")}
         />
 
@@ -117,7 +119,7 @@ export function RegisterScreen({ navigation }: Props) {
           render={({ field: { value } }) => (
             <TextField
               editable={false}
-              label="Country"
+              label={copy.auth.country}
               onChangeText={() => undefined}
               value={value}
             />
@@ -131,9 +133,9 @@ export function RegisterScreen({ navigation }: Props) {
           render={({ field: { onChange, value } }) => (
             <TextField
               error={errors.password?.message}
-              label="Password"
+              label={copy.auth.password}
               onChangeText={onChange}
-              placeholder="Enter password"
+              placeholder={copy.auth.enterPassword}
               secureTextEntry
               value={value}
             />
@@ -150,22 +152,22 @@ export function RegisterScreen({ navigation }: Props) {
           render={({ field: { onChange, value } }) => (
             <TextField
               error={errors.confirmPassword?.message}
-              label="Confirm Password"
+              label={copy.auth.confirmPassword}
               onChangeText={onChange}
-              placeholder="Confirm password"
+              placeholder={copy.auth.confirmPassword}
               secureTextEntry
               value={value}
             />
           )}
         />
 
-        <Button label="Create Account" loading={isLoading} onPress={onSubmit} />
+        <Button label={copy.auth.createAccountButton} loading={isLoading} onPress={onSubmit} />
       </Card>
 
       <Modal animationType="slide" transparent visible={showStateModal}>
         <View style={styles.modalBackdrop}>
           <Card>
-            <Text style={styles.modalTitle}>Choose your state</Text>
+            <Text style={styles.modalTitle}>{copy.auth.chooseState}</Text>
             <ScrollView contentContainerStyle={styles.stateListContent} style={styles.stateList}>
               {INDIAN_STATES.map((stateName) => (
                 <Pressable
@@ -180,7 +182,7 @@ export function RegisterScreen({ navigation }: Props) {
                 </Pressable>
               ))}
             </ScrollView>
-            <Button label="Close" onPress={() => setShowStateModal(false)} variant="secondary" />
+            <Button label={copy.auth.close} onPress={() => setShowStateModal(false)} variant="secondary" />
           </Card>
         </View>
       </Modal>

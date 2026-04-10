@@ -10,11 +10,9 @@ import { colors } from "../theme/colors";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Rules">;
 
-const rulesText = `1. ആരും അവരുടെ വിവാഹ ലക്ഷ്യത്തിനായി മാത്രമേ ഈ ആപ്പ് തുറന്ന് ഉപയോഗിക്കരുത്.
+const rulesText = `1. This Bajol APP is used only for Wedding.
 
-2. ഗാലറി നമ്പർ ഏതെങ്കിലും സാഹചര്യത്തിലും ദുരുപയോഗം ചെയ്യരുത്; ചെയ്താൽ നിയമാനുസൃത നടപടികൾ ഉണ്ടായിരിക്കും.
-
-നന്ദി`;
+2. The gallery number must not be misused under any circumstances; if it is misused, legal action will be taken.`;
 
 export function RulesScreen({ navigation }: Props) {
   return (

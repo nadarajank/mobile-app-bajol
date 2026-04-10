@@ -14,6 +14,7 @@ import { TextField } from "../components/TextField";
 import { INDIAN_STATES } from "../constants/stateOptions";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { setAuthUser } from "../features/form/formSlice";
+import { useLanguage } from "../localization/LanguageContext";
 import { setToken, setUser } from "../features/auth/authSlice";
 import { saveSession } from "../storage/sessionStorage";
 import { colors } from "../theme/colors";
@@ -28,6 +29,7 @@ type LoginValues = {
 };
 
 export function LoginScreen({ navigation }: Props) {
+  const { copy } = useLanguage();
   const dispatch = useAppDispatch();
   const otpLoading = useAppSelector((state) => state.otp.loading);
   const [loginUser, { isLoading }] = useLoginUserMutation();
@@ -74,10 +76,14 @@ export function LoginScreen({ navigation }: Props) {
       }
 
       const { token: _ignored, ...userData } = result.user;
+      const normalizedUserData = {
+        ...userData,
+        state: String(userData?.state ?? values.state).trim(),
+      };
       dispatch(setToken(token));
-      dispatch(setUser(userData));
-      dispatch(setAuthUser(userData));
-      await saveSession(token, userData);
+      dispatch(setUser(normalizedUserData));
+      dispatch(setAuthUser(normalizedUserData));
+      await saveSession(token, normalizedUserData);
       navigation.reset({ index: 0, routes: [{ name: "Discovery" }] });
     } catch (error: any) {
       Alert.alert("Login failed", error?.data?.message || "Please try again.");
@@ -155,7 +161,7 @@ export function LoginScreen({ navigation }: Props) {
   return (
     <Screen>
       <Card>
-        <Text style={styles.title}>Sign in to continue</Text>
+        <Text style={styles.title}>{copy.auth.signInTitle}</Text>
 
         <Controller
           control={control}
@@ -165,7 +171,7 @@ export function LoginScreen({ navigation }: Props) {
             <TextField
               error={errors.mobileNumber?.message}
               keyboardType="phone-pad"
-              label="Mobile Number"
+              label={copy.auth.mobileNumber}
               onChangeText={onChange}
               placeholder="91XXXXXXXXXX"
               value={value}
@@ -175,9 +181,9 @@ export function LoginScreen({ navigation }: Props) {
 
         <PickerField
           error={errors.state?.message}
-          label="State"
+          label={copy.auth.state}
           onPress={() => setShowStateModal(true)}
-          placeholder="Select your state"
+          placeholder={copy.auth.selectState}
           value={stateValue}
         />
 
@@ -195,9 +201,9 @@ export function LoginScreen({ navigation }: Props) {
           render={({ field: { onChange, value } }) => (
             <TextField
               error={errors.password?.message}
-              label="Password"
+              label={copy.auth.password}
               onChangeText={onChange}
-              placeholder="Enter password"
+              placeholder={copy.auth.enterPassword}
               secureTextEntry
               value={value}
             />
@@ -205,9 +211,9 @@ export function LoginScreen({ navigation }: Props) {
         />
 
         <View style={styles.actions}>
-          <Button label="Sign In" loading={isLoading} onPress={onSubmit} />
+          <Button label={copy.auth.signInButton} loading={isLoading} onPress={onSubmit} />
           <Pressable onPress={() => setForgotPasswordVisible(true)}>
-            <Text style={styles.link}>Forgot password?</Text>
+            <Text style={styles.link}>{copy.auth.forgotPassword}</Text>
           </Pressable>
         </View>
       </Card>
@@ -215,7 +221,7 @@ export function LoginScreen({ navigation }: Props) {
       <Modal animationType="slide" transparent visible={showStateModal}>
         <View style={styles.modalBackdrop}>
           <Card>
-            <Text style={styles.modalTitle}>Choose your state</Text>
+            <Text style={styles.modalTitle}>{copy.auth.chooseState}</Text>
             <ScrollView contentContainerStyle={styles.stateListContent} style={styles.stateList}>
               {INDIAN_STATES.map((stateName) => (
                 <Pressable
@@ -230,7 +236,7 @@ export function LoginScreen({ navigation }: Props) {
                 </Pressable>
               ))}
             </ScrollView>
-            <Button label="Close" onPress={() => setShowStateModal(false)} variant="secondary" />
+            <Button label={copy.auth.close} onPress={() => setShowStateModal(false)} variant="secondary" />
           </Card>
         </View>
       </Modal>
@@ -238,51 +244,51 @@ export function LoginScreen({ navigation }: Props) {
       <Modal animationType="slide" transparent visible={forgotPasswordVisible}>
         <View style={styles.modalBackdrop}>
           <Card>
-            <Text style={styles.modalTitle}>Reset Password</Text>
+            <Text style={styles.modalTitle}>{copy.auth.resetPassword}</Text>
             <TextField
               keyboardType="phone-pad"
-              label="Mobile Number"
+              label={copy.auth.mobileNumber}
               onChangeText={setForgotMobile}
               placeholder="91XXXXXXXXXX"
               value={forgotMobile}
             />
-            <Button label="Send OTP" loading={otpLoading} onPress={handleSendOtp} />
+            <Button label={copy.auth.sendOtp} loading={otpLoading} onPress={handleSendOtp} />
 
             <View style={styles.sectionGap} />
 
             <TextField
               keyboardType="number-pad"
-              label="OTP"
+              label={copy.auth.otp}
               onChangeText={setForgotOtp}
-              placeholder="Enter OTP"
+              placeholder={copy.auth.otp}
               value={forgotOtp}
             />
-            <Button label="Verify OTP" onPress={handleVerifyOtp} variant="secondary" />
+            <Button label={copy.auth.verifyOtp} onPress={handleVerifyOtp} variant="secondary" />
 
             <View style={styles.sectionGap} />
 
             <TextField
-              label="New Password"
+              label={copy.auth.newPassword}
               onChangeText={setNewPassword}
-              placeholder="Enter new password"
+              placeholder={copy.auth.newPassword}
               secureTextEntry
               value={newPassword}
             />
             <TextField
-              label="Confirm Password"
+              label={copy.auth.confirmPassword}
               onChangeText={setConfirmPassword}
-              placeholder="Confirm password"
+              placeholder={copy.auth.confirmPassword}
               secureTextEntry
               value={confirmPassword}
             />
             <Button
-              label="Update Password"
+              label={copy.auth.updatePassword}
               loading={isResettingPassword}
               onPress={handleResetPassword}
             />
             <View style={styles.sectionGap} />
             <Button
-              label="Back to Login"
+              label={copy.auth.backToLogin}
               onPress={() => setForgotPasswordVisible(false)}
               variant="secondary"
             />
