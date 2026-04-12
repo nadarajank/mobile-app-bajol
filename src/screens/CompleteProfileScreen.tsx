@@ -12,6 +12,7 @@ import { TextField } from "../components/TextField";
 import {
   COUNTRY_OPTIONS,
   GENDER_OPTIONS,
+  JOB_OPTIONS,
   MARRIAGE_COUNT_OPTIONS,
   MARRIAGE_PERSON_OPTIONS,
   STATE_OPTIONS,
@@ -45,52 +46,6 @@ type ProfileFormValues = {
 };
 
 type PickerName = "country" | "state" | "district" | "gender" | "count" | "person" | "job" | null;
-
-const JOB_OPTIONS = [
-  "Doctor",
-  "Nurse",
-  "Army",
-  "CRPF",
-  "Police",
-  "Excise",
-  "Forest",
-  "water authority",
-  "Electricity Board",
-  "Education sector",
-  "IT",
-  "Veterinary Doctor",
-  "Customs",
-  "Advocate",
-  "Tourism field",
-  "Working gulf",
-  "Government job",
-  "Church Priest",
-  "Church Pastor",
-  "Temple Priest",
-  "Marketing Field",
-  "Cinema field",
-  "Journalist",
-  "Driver",
-  "Printing press field",
-  "Small Busines field",
-  "Big Business field",
-  "Plumber",
-  "Electrician",
-  "Tourism",
-  "Vlogger",
-  "Painter",
-  "Mason",
-  "Welder",
-  "Sales job",
-  "Engineer",
-  "Computer field",
-  "Workshop field",
-  "Makeup artist",
-  "Beautician",
-  "Hair maker",
-  "Therapist",
-  "Another",
-] as const;
 
 const normalizeStateName = (value: unknown) =>
   STATE_OPTIONS.find(

@@ -17,7 +17,7 @@ import { Card } from "../components/Card";
 import { PickerField } from "../components/PickerField";
 import { Screen } from "../components/Screen";
 import { TextField } from "../components/TextField";
-import { GENDER_OPTIONS, STATE_OPTIONS } from "../constants/profileOptions";
+import { GENDER_OPTIONS, JOB_OPTIONS, STATE_OPTIONS } from "../constants/profileOptions";
 import { STATE_DISTRICT_MAP } from "../constants/stateDistrictMap";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { useLanguage } from "../localization/LanguageContext";
@@ -26,7 +26,16 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { colors } from "../theme/colors";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Discovery">;
-type PickerName = "district" | "gender" | null;
+type PickerName = "district" | "gender" | "job" | null;
+type DiscoveryFilters = {
+  country: string;
+  state: string;
+  district: string;
+  gender: string;
+  job: string;
+};
+
+const NO_JOB_FILTER = "No need job";
 
 const countries = ["India"];
 const normalizeStateName = (value: unknown) =>
@@ -72,13 +81,9 @@ export function DiscoveryScreen({ navigation }: Props) {
     state: defaultState,
     district: "",
     gender: "",
+    job: "",
   });
-  const [submittedFilters, setSubmittedFilters] = useState<{
-    country: string;
-    state: string;
-    district: string;
-    gender: string;
-  } | null>(null);
+  const [submittedFilters, setSubmittedFilters] = useState<DiscoveryFilters | null>(null);
   const districts = useMemo(
     () => (filters.state ? STATE_DISTRICT_MAP[filters.state] || [] : []),
     [filters.state],
@@ -106,7 +111,13 @@ export function DiscoveryScreen({ navigation }: Props) {
         ? {
             page: 1,
             limit: 100,
-            filter: submittedFilters,
+            filter: {
+              ...submittedFilters,
+              job:
+                !submittedFilters.job || submittedFilters.job === NO_JOB_FILTER
+                  ? null
+                  : submittedFilters.job,
+            },
           }
         : undefined,
     [submittedFilters],
@@ -136,7 +147,9 @@ export function DiscoveryScreen({ navigation }: Props) {
   const options =
     activePicker === "district"
         ? districts
-        : GENDER_OPTIONS;
+        : activePicker === "job"
+          ? [NO_JOB_FILTER, ...JOB_OPTIONS]
+          : GENDER_OPTIONS;
   const handleProfile = async () => {
     if (!userId) {
       Alert.alert("Missing user", "User ID is required to load your profile.");
@@ -318,6 +331,12 @@ export function DiscoveryScreen({ navigation }: Props) {
           value={filters.gender}
           placeholder={copy.discovery.selectGender}
           onPress={() => setActivePicker("gender")}
+        />
+        <PickerField
+          label={copy.discovery.job}
+          value={filters.job}
+          placeholder="Select job"
+          onPress={() => setActivePicker("job")}
         />
 
         <View style={styles.gap} />

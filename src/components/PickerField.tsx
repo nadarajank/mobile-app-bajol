@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleProp, StyleSheet, Text, TextStyle, View } from "react-native";
 
 import { colors } from "../theme/colors";
 
@@ -9,14 +9,16 @@ type Props = {
   placeholder: string;
   onPress: () => void;
   error?: string;
+  labelStyle?: StyleProp<TextStyle>;
+  valueTextStyle?: StyleProp<TextStyle>;
 };
 
-export function PickerField({ error, label, onPress, placeholder, value }: Props) {
+export function PickerField({ error, label, labelStyle, onPress, placeholder, value, valueTextStyle }: Props) {
   return (
     <View style={styles.wrapper}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, labelStyle]}>{label}</Text>
       <Pressable onPress={onPress} style={[styles.trigger, error && styles.triggerError]}>
-        <Text style={[styles.value, !value && styles.placeholder]}>{value || placeholder}</Text>
+        <Text style={[styles.value, valueTextStyle, !value && styles.placeholder]}>{value || placeholder}</Text>
       </Pressable>
       {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>

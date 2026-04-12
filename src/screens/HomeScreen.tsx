@@ -89,9 +89,11 @@ export function HomeScreen({ navigation }: Props) {
               </View>
               <PickerField
                 label={copy.home.languageTitle}
+                labelStyle={styles.languagePickerLabel}
                 onPress={() => setShowLanguageModal(true)}
                 placeholder={copy.home.languageHint}
                 value={selectedLanguage ? `${selectedLanguage.nativeLabel} (${selectedLanguage.label})` : ""}
+                valueTextStyle={styles.languagePickerValue}
               />
             </View>
           </Card>
@@ -297,6 +299,14 @@ const styles = StyleSheet.create({
   },
   actions: {
     gap: 12,
+  },
+  languagePickerLabel: {
+    fontSize: 20,
+    fontWeight: "900",
+  },
+  languagePickerValue: {
+    fontSize: 18,
+    fontWeight: "600",
   },
   modalBackdrop: {
     backgroundColor: "rgba(30, 27, 22, 0.45)",

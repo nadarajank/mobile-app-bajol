@@ -7,7 +7,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { colors } from "../theme/colors";
 
@@ -17,14 +17,19 @@ type ScreenProps = PropsWithChildren<{
 }>;
 
 export function Screen({ children, onRefresh, refreshing = false }: ScreenProps) {
+  const insets = useSafeAreaInsets();
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={insets.top}
         style={styles.flex}
       >
         <ScrollView
           contentContainerStyle={styles.content}
+          contentInsetAdjustmentBehavior="automatic"
+          keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
           keyboardShouldPersistTaps="handled"
           refreshControl={
             onRefresh ? (
@@ -54,6 +59,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
+    paddingBottom: 24,
   },
   inner: {
     flex: 1,
