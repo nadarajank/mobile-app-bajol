@@ -742,13 +742,13 @@ export function ProfileScreen({ navigation }: Props) {
   // The main render logic follows the same flow as the web `profile.tsx` component, with additional loading and error states.
   return (
     <Screen onRefresh={handleRefresh} refreshing={isRefreshing}>
-      {!hasPayments
+      {/* {!hasPayments
         ? renderPlanState()
         : shouldShowProfileForm
           ? renderCompleteProfileState()
           : !hasImages
             ? renderUploadPhotoState()
-            : renderDiscoveryState()}
+            : renderDiscoveryState()} */}
 
 
       {/* if (!hasPayments) {
@@ -760,6 +760,16 @@ export function ProfileScreen({ navigation }: Props) {
 } else {
   content = renderDiscoveryState();
 } */}
+
+   {!hasPayments ? (
+    renderCompleteProfileState()
+  ) : !hasImages ? (
+    renderUploadPhotoState()
+  ) : (
+    renderDiscoveryState()
+  )}
+
+
     </Screen>
   );
 }

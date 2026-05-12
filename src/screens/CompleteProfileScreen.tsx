@@ -30,7 +30,7 @@ type ProfileFormValues = {
   job: string;
   customJob: string;
   monthlySalary: string;
-  notes: string;
+  // notes: string;
   country: string;
   state: string;
   district: string;
@@ -84,7 +84,7 @@ export function CompleteProfileScreen({ navigation, route }: Props) {
       job: normalizedInitialJob,
       customJob: normalizedInitialJob === "Another" ? initialJob : "",
       monthlySalary: String(initialData?.monthlySalary || ""),
-      notes: String(initialData?.notes || ""),
+      // notes: String(initialData?.notes || ""),
       country: String(initialData?.country || "India"),
       state: String(defaultState || initialData?.state || authUserState || ""),
       district: String(initialData?.district || ""),
@@ -195,9 +195,9 @@ export function CompleteProfileScreen({ navigation, route }: Props) {
         <Controller control={control} name="monthlySalary" rules={{ required: "Monthly salary is required" }} render={({ field }) => (
           <TextField label="Monthly Salary" keyboardType="number-pad" value={field.value} onChangeText={field.onChange} error={errors.monthlySalary?.message} />
         )} />
-        <Controller control={control} name="notes" render={({ field }) => (
+        {/* <Controller control={control} name="notes" render={({ field }) => (
           <TextField label="Notes" value={field.value} onChangeText={field.onChange} error={errors.notes?.message} placeholder="Enter additional notes" />
-        )} />
+        )} /> */}
 
         {renderPicker("country", "Country", "Select country")}
         {renderPicker("state", "State", "Select state")}

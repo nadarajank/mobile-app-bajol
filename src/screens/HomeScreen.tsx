@@ -10,6 +10,7 @@ import { useLanguage } from "../localization/LanguageContext";
 import { languageOptions } from "../localization/translations";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { colors } from "../theme/colors";
+import GoldenGlobeCard from "@/components/GoldenGlobeCard";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
@@ -99,7 +100,7 @@ export function HomeScreen({ navigation }: Props) {
           </Card>
         </Animated.View>
 
-        <Animated.View style={getRevealStyle(couplesCardAnim)}>
+        {/* <Animated.View style={getRevealStyle(couplesCardAnim)}>
           <Card>
             <View style={styles.section}>
               <Text style={styles.bannerText}>❤️ {copy.home.alliancesTitle} ❤️</Text>
@@ -113,7 +114,9 @@ export function HomeScreen({ navigation }: Props) {
               <Text style={styles.caption}>❤️ {copy.home.alliancesCaption} ❤️</Text>
             </View>
           </Card>
-        </Animated.View>
+        </Animated.View> */}
+        <GoldenGlobeCard/>
+        
 
         <Animated.View style={getRevealStyle(featureCardsAnim)}>
           <View style={styles.section}>

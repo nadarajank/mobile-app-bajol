@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import {
@@ -61,8 +61,8 @@ export function DiscoveryScreen({ navigation }: Props) {
       : null;
   const fallbackUserDetails =
     fallbackAuthUser &&
-    typeof fallbackAuthUser["userDetails"] === "object" &&
-    fallbackAuthUser["userDetails"] !== null
+      typeof fallbackAuthUser["userDetails"] === "object" &&
+      fallbackAuthUser["userDetails"] !== null
       ? (fallbackAuthUser["userDetails"] as Record<string, unknown>)
       : null;
   const authUserState =
@@ -109,16 +109,16 @@ export function DiscoveryScreen({ navigation }: Props) {
     () =>
       submittedFilters
         ? {
-            page: 1,
-            limit: 100,
-            filter: {
-              ...submittedFilters,
-              job:
-                !submittedFilters.job || submittedFilters.job === NO_JOB_FILTER
-                  ? null
-                  : submittedFilters.job,
-            },
-          }
+          page: 1,
+          limit: 100,
+          filter: {
+            ...submittedFilters,
+            job:
+              !submittedFilters.job || submittedFilters.job === NO_JOB_FILTER
+                ? null
+                : submittedFilters.job,
+          },
+        }
         : undefined,
     [submittedFilters],
   );
@@ -146,10 +146,10 @@ export function DiscoveryScreen({ navigation }: Props) {
 
   const options =
     activePicker === "district"
-        ? districts
-        : activePicker === "job"
-          ? [NO_JOB_FILTER, ...JOB_OPTIONS]
-          : GENDER_OPTIONS;
+      ? districts
+      : activePicker === "job"
+        ? [NO_JOB_FILTER, ...JOB_OPTIONS]
+        : GENDER_OPTIONS;
   const handleProfile = async () => {
     if (!userId) {
       Alert.alert("Missing user", "User ID is required to load your profile.");
@@ -290,6 +290,10 @@ export function DiscoveryScreen({ navigation }: Props) {
     } catch (error: any) {
       Alert.alert("Reply failed", error?.data?.message || "Unable to post reply.");
     }
+  };
+
+  const handleUnlockContact = () => {
+     Alert.alert("Success", "After successful payment, contact details will be unlocked. This is a demo flow, so no actual payment is processed.");
   };
 
   return (
@@ -439,15 +443,48 @@ export function DiscoveryScreen({ navigation }: Props) {
                 {copy.discovery.state}: {selectedUser?.state || selectedUser?.userDetails?.state || "N/A"}
               </Text>
               <Text style={styles.detailItem}>{copy.discovery.countryLabel}: {selectedUser?.country || "N/A"}</Text>
-              <Text style={styles.detailItem}>{copy.discovery.phone}: {selectedUser?.phone_number || "N/A"}</Text>
+              {/* <Text style={styles.detailItem}>{copy.discovery.phone}: {selectedUser?.phone_number || "N/A"}</Text>
               <Text style={styles.detailItem}>{copy.discovery.whatsapp}: {selectedUser?.whatsapp || "N/A"}</Text>
+              <Text style={styles.mb3}>
+                Pay 49 RS to Bajol for this mobile number and WhatsApp number.
+                We use Cashfree for secure payments.
+              </Text> */}
+              {selectedUser?.hasPayments ? (
+                <>
+                  <Text style={styles.detailItem}>
+                    {copy.discovery.phone}:{" "}
+                    {selectedUser?.phone_number || "N/A"}
+                  </Text>
+
+                  <Text style={styles.detailItem}>
+                    {copy.discovery.whatsapp}:{" "}
+                    {selectedUser?.whatsapp || "N/A"}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.mb3}>
+                    Pay 49 RS to Bajol for this mobile number and WhatsApp number.
+                    We use Cashfree for secure payments.
+                  </Text>
+
+                  <TouchableOpacity
+                    style={styles.payButton}
+                    onPress={handleUnlockContact}
+                  >
+                    <Text style={styles.payButtonText}>
+                      Pay Now
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              )}
               <Text style={styles.detailItem}>{copy.discovery.job}: {selectedUser?.job || "N/A"}</Text>
               <Text style={styles.detailItem}>{copy.discovery.monthlySalary}: {selectedUser?.monthlySalary || "N/A"}</Text>
               <Text style={styles.detailItem}>
                 {copy.discovery.marriageStatus}: {selectedUser?.count || selectedUser?.userDetails?.count || "N/A"}
               </Text>
               <Text style={styles.detailItem}>{copy.discovery.whoseMarriage}: {selectedUser?.person || "N/A"}</Text>
-              <View style={styles.commentSection}>
+              {/* <View style={styles.commentSection}>
                 <Text style={styles.commentSectionTitle}>{copy.discovery.comments}</Text>
                 <TextField
                   label={copy.discovery.addComment}
@@ -521,7 +558,7 @@ export function DiscoveryScreen({ navigation }: Props) {
                     );
                   })
                 )}
-              </View>
+              </View> */}
             </ScrollView>
             <Button label={copy.auth.close} onPress={() => setSelectedUser(null)} variant="secondary" />
           </Card>
@@ -684,4 +721,25 @@ const styles = StyleSheet.create({
   replyComposer: {
     marginTop: 12,
   },
+ 
+  payButton: {
+  backgroundColor: "#D4AF37",
+  paddingVertical: 14,
+  borderRadius: 12,
+  alignItems: "center",
+  marginTop: 10,
+},
+
+payButtonText: {
+  color: "#FFFFFF",
+  fontSize: 16,
+  fontWeight: "700",
+},
+
+mb3: {
+  marginBottom: 12,
+  fontSize: 15,
+  color: "#444",
+  lineHeight: 24,
+},
 });
