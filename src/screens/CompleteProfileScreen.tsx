@@ -15,6 +15,7 @@ import {
   JOB_OPTIONS,
   MARRIAGE_COUNT_OPTIONS,
   MARRIAGE_PERSON_OPTIONS,
+  RELIGION_OPTIONS,
   STATE_OPTIONS,
 } from "../constants/profileOptions";
 import { RootStackParamList } from "../navigation/AppNavigator";
@@ -45,7 +46,7 @@ type ProfileFormValues = {
   // weight: string;
 };
 
-type PickerName = "country" | "state" | "district" | "gender" | "count" | "person" | "job" | null;
+type PickerName = "country" | "state" | "district" | "gender" | "religion" | "count" | "person" | "job" | null;
 
 const normalizeStateName = (value: unknown) =>
   STATE_OPTIONS.find(
@@ -56,6 +57,7 @@ const pickerOptions: Record<Exclude<PickerName, "district" | null>, readonly str
   country: COUNTRY_OPTIONS,
   state: STATE_OPTIONS,
   gender: GENDER_OPTIONS,
+  religion: RELIGION_OPTIONS,
   count: MARRIAGE_COUNT_OPTIONS,
   person: MARRIAGE_PERSON_OPTIONS,
   job: JOB_OPTIONS,
@@ -69,7 +71,17 @@ export function CompleteProfileScreen({ navigation, route }: Props) {
   const userId = route.params?.userId;
   const initialData = route.params?.initialData || {};
   const authUser = useAppSelector((state) => state.auth.user);
-  const authUserState = authUser?.["state"];
+  const fallbackAuthUser = useAppSelector((state) => state.form.authUser);
+  const authUserState = authUser?.["state"] || fallbackAuthUser?.["state"];
+  const registeredMobile = String(
+    initialData?.phone_number ||
+      initialData?.mobile ||
+      authUser?.["phone_number"] ||
+      authUser?.["mobile"] ||
+      fallbackAuthUser?.["phone_number"] ||
+      fallbackAuthUser?.["mobile"] ||
+      "",
+  );
   const initialJob = String(initialData?.job || "");
   const normalizedInitialJob = JOB_OPTIONS.includes(initialJob as (typeof JOB_OPTIONS)[number]) ? initialJob : initialJob ? "Another" : "";
   const defaultState = useMemo(
@@ -88,7 +100,7 @@ export function CompleteProfileScreen({ navigation, route }: Props) {
       country: String(initialData?.country || "India"),
       state: String(defaultState || initialData?.state || authUserState || ""),
       district: String(initialData?.district || ""),
-      mobile: String(initialData?.phone_number || initialData?.mobile || ""),
+      mobile: registeredMobile,
       whatsapp: String(initialData?.whatsapp || ""),
       caste: String(initialData?.caste || ""),
       religion: String(initialData?.religion || ""),
@@ -204,7 +216,14 @@ export function CompleteProfileScreen({ navigation, route }: Props) {
         {renderPicker("district", "District", selectedState ? "Select district" : "Select state first")}
 
         <Controller control={control} name="mobile" rules={{ required: "Mobile is required" }} render={({ field }) => (
-          <TextField label="Mobile" keyboardType="phone-pad" value={field.value} onChangeText={field.onChange} error={errors.mobile?.message} />
+          <TextField
+            editable={false}
+            label="Mobile"
+            keyboardType="phone-pad"
+            value={field.value}
+            onChangeText={() => undefined}
+            error={errors.mobile?.message}
+          />
         )} />
         <Controller control={control} name="whatsapp" rules={{ required: "Whatsapp is required" }} render={({ field }) => (
           <TextField label="Whatsapp" keyboardType="phone-pad" value={field.value} onChangeText={field.onChange} error={errors.whatsapp?.message} />
@@ -212,9 +231,7 @@ export function CompleteProfileScreen({ navigation, route }: Props) {
         <Controller control={control} name="caste" rules={{ required: "Caste is required" }} render={({ field }) => (
           <TextField label="Caste" value={field.value} onChangeText={field.onChange} error={errors.caste?.message} />
         )} />
-        <Controller control={control} name="religion" rules={{ required: "Religion is required" }} render={({ field }) => (
-          <TextField label="Religion" value={field.value} onChangeText={field.onChange} error={errors.religion?.message} />
-        )} />
+        {renderPicker("religion", "Religion", "Select religion")}
 
         {renderPicker("gender", "Gender", "Select gender")}
         {renderPicker("count", "Marriage Count", "Select marriage count")}

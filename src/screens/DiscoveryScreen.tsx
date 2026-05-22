@@ -17,7 +17,7 @@ import { Card } from "../components/Card";
 import { PickerField } from "../components/PickerField";
 import { Screen } from "../components/Screen";
 import { TextField } from "../components/TextField";
-import { GENDER_OPTIONS, JOB_OPTIONS, STATE_OPTIONS } from "../constants/profileOptions";
+import { GENDER_OPTIONS, JOB_OPTIONS, RELIGION_OPTIONS, STATE_OPTIONS } from "../constants/profileOptions";
 import { STATE_DISTRICT_MAP } from "../constants/stateDistrictMap";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { useLanguage } from "../localization/LanguageContext";
@@ -26,12 +26,13 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { colors } from "../theme/colors";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Discovery">;
-type PickerName = "district" | "gender" | "job" | null;
+type PickerName = "state" | "district" | "gender" | "religion" | "job" | null;
 type DiscoveryFilters = {
   country: string;
   state: string;
   district: string;
   gender: string;
+  religion: string;
   job: string;
 };
 
@@ -81,6 +82,7 @@ export function DiscoveryScreen({ navigation }: Props) {
     state: defaultState,
     district: "",
     gender: "",
+    religion: "",
     job: "",
   });
   const [submittedFilters, setSubmittedFilters] = useState<DiscoveryFilters | null>(null);
@@ -90,14 +92,13 @@ export function DiscoveryScreen({ navigation }: Props) {
   );
 
   useEffect(() => {
-    if (filters.country !== countries[0] || (!filters.state && defaultState)) {
+    if (filters.country !== countries[0]) {
       setFilters((prev) => ({
         ...prev,
         country: countries[0],
-        ...(!prev.state && defaultState ? { state: defaultState } : {}),
       }));
     }
-  }, [defaultState, filters.country, filters.state]);
+  }, [filters.country]);
 
   useEffect(() => {
     if (filters.district && !districts.includes(filters.district)) {
@@ -113,6 +114,7 @@ export function DiscoveryScreen({ navigation }: Props) {
           limit: 100,
           filter: {
             ...submittedFilters,
+            religion: submittedFilters.religion || null,
             job:
               !submittedFilters.job || submittedFilters.job === NO_JOB_FILTER
                 ? null
@@ -147,9 +149,13 @@ export function DiscoveryScreen({ navigation }: Props) {
   const options =
     activePicker === "district"
       ? districts
-      : activePicker === "job"
+      : activePicker === "state"
+        ? STATE_OPTIONS
+        : activePicker === "job"
         ? [NO_JOB_FILTER, ...JOB_OPTIONS]
-        : GENDER_OPTIONS;
+        : activePicker === "religion"
+          ? RELIGION_OPTIONS
+          : GENDER_OPTIONS;
   const handleProfile = async () => {
     if (!userId) {
       Alert.alert("Missing user", "User ID is required to load your profile.");
@@ -240,10 +246,14 @@ export function DiscoveryScreen({ navigation }: Props) {
     "Anonymous";
 
   const handleOpenProfile = (user: any) => {
-    setSelectedUser(user);
-    setCommentText("");
-    setReplyText("");
-    setActiveReplyId(null);
+    const profileId = Number(user?.id || 0);
+
+    if (!profileId) {
+      Alert.alert("Profile unavailable", "Unable to open this profile.");
+      return;
+    }
+
+    navigation.navigate("ProfileDetail", { profileId });
   };
 
   const handleAddComment = async () => {
@@ -309,12 +319,11 @@ export function DiscoveryScreen({ navigation }: Props) {
           editable={false}
           placeholder={countries[0]}
         />
-        <TextField
+        <PickerField
           label={copy.discovery.state}
           value={filters.state}
-          onChangeText={() => undefined}
-          editable={false}
-          placeholder={defaultState || "State"}
+          placeholder={defaultState || "Select state"}
+          onPress={() => setActivePicker("state")}
         />
         <PickerField
           label={copy.discovery.district}
@@ -335,6 +344,12 @@ export function DiscoveryScreen({ navigation }: Props) {
           value={filters.gender}
           placeholder={copy.discovery.selectGender}
           onPress={() => setActivePicker("gender")}
+        />
+        <PickerField
+          label={copy.discovery.religion}
+          value={filters.religion}
+          placeholder="Select religion"
+          onPress={() => setActivePicker("religion")}
         />
         <PickerField
           label={copy.discovery.job}
@@ -399,6 +414,7 @@ export function DiscoveryScreen({ navigation }: Props) {
                     setFilters((prev) => ({
                       ...prev,
                       [key]: option,
+                      ...(key === "state" ? { district: "" } : {}),
                     }));
                     setActivePicker(null);
                   }}

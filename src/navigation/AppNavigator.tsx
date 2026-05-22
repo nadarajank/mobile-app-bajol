@@ -18,6 +18,7 @@ import { NotFoundScreen } from "../screens/NotFoundScreen";
 import { OnboardingScreen } from "../screens/OnboardingScreen";
 import { PrivacyPolicyScreen } from "../screens/PrivacyPolicyScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
+import { ProfileDetailScreen } from "../screens/ProfileDetailScreen";
 import { RegisterScreen } from "../screens/RegisterScreen";
 import { RulesScreen } from "../screens/RulesScreen";
 import { UploadPhotoScreen } from "../screens/UploadPhotoScreen";
@@ -27,6 +28,7 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   Profile: undefined;
+  ProfileDetail: { profileId: number };
   About: undefined;
   Rules: undefined;
   Conclusion: undefined;
@@ -90,6 +92,7 @@ function NavigatorContent() {
         <Stack.Screen name="Login" component={LoginScreen} options={{ title: copy.nav.login }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ title: copy.nav.register }} />
         <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: copy.nav.profile }} />
+        <Stack.Screen name="ProfileDetail" component={ProfileDetailScreen} options={{ title: copy.nav.profile }} />
         <Stack.Screen name="About" component={AboutScreen} options={{ title: copy.nav.about }} />
         <Stack.Screen name="Rules" component={RulesScreen} options={{ title: copy.nav.rules }} />
         <Stack.Screen
@@ -155,6 +158,7 @@ function NavigatorContent() {
         options={{ title: copy.nav.completeProfile }}
       />
       <Stack.Screen name="Discovery" component={DiscoveryScreen} options={{ title: copy.nav.discovery }} />
+      <Stack.Screen name="ProfileDetail" component={ProfileDetailScreen} options={{ title: copy.nav.profile }} />
       <Stack.Screen name="UploadPhoto" component={UploadPhotoScreen} options={{ title: copy.nav.uploadPhoto }} />
     </Stack.Navigator>
   );

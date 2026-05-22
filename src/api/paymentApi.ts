@@ -12,7 +12,17 @@ type CreateCashfreeOrderRequest = {
   customer_phone?: string;
 };
 
-type CreateCashfreeOrderResponse = {
+type CreateProfileAccessOrderRequest = {
+  viewer_user_id: number;
+  target_user_id: number;
+  order_amount: number;
+  order_currency: string;
+  receipt: string;
+  customer_email?: string;
+  customer_phone?: string;
+};
+
+type CashfreeOrderResponse = {
   success: boolean;
   cashfree_order?: {
     order_id?: string;
@@ -25,12 +35,18 @@ type CreateCashfreeOrderResponse = {
   };
 };
 
+type ConfirmProfileAccessOrderResponse = {
+  success: boolean;
+  message?: string;
+  unlockedProfile?: Record<string, unknown>;
+};
+
 export const paymentApi = createApi({
   reducerPath: "paymentApi",
   baseQuery: apiBaseQuery,
   endpoints: (builder) => ({
     createCashfreeOrder: builder.mutation<
-      CreateCashfreeOrderResponse,
+      CashfreeOrderResponse,
       CreateCashfreeOrderRequest
     >({
       query: (body) => ({
@@ -39,7 +55,31 @@ export const paymentApi = createApi({
         body,
       }),
     }),
+    createProfileAccessOrder: builder.mutation<
+      CashfreeOrderResponse,
+      CreateProfileAccessOrderRequest
+    >({
+      query: (body) => ({
+        url: "/cashfree/create-profile-access-order",
+        method: "POST",
+        body,
+      }),
+    }),
+    confirmProfileAccessOrder: builder.mutation<
+      ConfirmProfileAccessOrderResponse,
+      { cashfree_order_id: string }
+    >({
+      query: (body) => ({
+        url: "/cashfree/confirm-profile-access-order",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
-export const { useCreateCashfreeOrderMutation } = paymentApi;
+export const {
+  useConfirmProfileAccessOrderMutation,
+  useCreateCashfreeOrderMutation,
+  useCreateProfileAccessOrderMutation,
+} = paymentApi;

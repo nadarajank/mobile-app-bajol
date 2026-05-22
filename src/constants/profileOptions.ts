@@ -2,6 +2,15 @@ import { INDIAN_STATES } from "./stateOptions";
 
 export const COUNTRY_OPTIONS = ["India"] as const;
 export const GENDER_OPTIONS = ["male", "female", "transgender"] as const;
+export const RELIGION_OPTIONS = [
+  "Hindu",
+  "Christian",
+  "Islam",
+  "Sikhism",
+  "Buddhism",
+  "Jainism",
+  "No religion",
+] as const;
 export const MARRIAGE_COUNT_OPTIONS = ["first", "second", "third"] as const;
 export const MARRIAGE_PERSON_OPTIONS = [
   "me",
