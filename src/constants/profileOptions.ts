@@ -21,6 +21,7 @@ export const MARRIAGE_PERSON_OPTIONS = [
   "other",
 ] as const;
 export const JOB_OPTIONS = [
+  "Another",
   "Doctor",
   "Nurse",
   "Army",
@@ -63,7 +64,6 @@ export const JOB_OPTIONS = [
   "Beautician",
   "Hair maker",
   "Therapist",
-  "Another",
 ] as const;
 
 export const PROFILE_REQUIRED_FIELDS = [

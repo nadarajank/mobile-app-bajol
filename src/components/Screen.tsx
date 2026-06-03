@@ -38,6 +38,7 @@ export function Screen({ children, onRefresh, refreshing = false }: ScreenProps)
                 onRefresh={onRefresh}
                 tintColor={colors.primary}
                 colors={[colors.primary]}
+                progressBackgroundColor={colors.background}
               />
             ) : undefined
           }
